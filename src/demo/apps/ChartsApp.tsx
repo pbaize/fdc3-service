@@ -47,7 +47,7 @@ export function ChartsApp(props: AppProps): React.ReactElement {
         });
 
         return function cleanUp() {
-            intentListener.unsubscribe();
+            intentListener.then(({unsubscribe}) => unsubscribe());
             contextListener.unsubscribe();
         };
     }, []);

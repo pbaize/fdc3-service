@@ -55,8 +55,8 @@ export function DialerApp(props: AppProps): React.ReactElement {
             }
         });
         let dialListener: IntentListener;
-        setTimeout(() => {
-            dialListener = addIntentListener(Intents.DIAL_CALL, (context: Context) => {
+        setTimeout(async () => {
+            dialListener = await addIntentListener(Intents.DIAL_CALL, (context: Context) => {
                 if (!inCall) {
                     handleIntent(context as ContactContext, false);
                 } else if (context.id && context.id.phone) {
@@ -83,7 +83,7 @@ export function DialerApp(props: AppProps): React.ReactElement {
             if (dialListener) {
                 dialListener.unsubscribe();
             }
-            callListener.unsubscribe();
+            callListener.then(({unsubscribe}) => unsubscribe());
             contextListener.unsubscribe();
         };
     }, []);

@@ -10,12 +10,15 @@ import {APIHandler} from '../APIHandler';
 import {collateClientCalls, ClientCallsResult} from '../utils/helpers';
 
 import {ResolverResult, ResolverHandlerBinding} from './ResolverHandler';
+import { fdc3, FDC3Agent } from '../../client/p2p';
 
 @injectable()
 export class IntentHandler {
     private readonly _model: Model;
     private readonly _resolver: ResolverHandlerBinding;
     private readonly _apiHandler: APIHandler<APIToClientTopic>;
+    //@ts-ignore
+    private _agent: FDC3Agent;
 
     private _resolvePromise: Promise<IntentResolution> | null;
 
@@ -30,7 +33,9 @@ export class IntentHandler {
 
         this._resolvePromise = null;
     }
-
+    protected async init (): Promise<void> {
+        this._agent = await fdc3.Agent.create('fdc3-p2p-service')
+    }
     public async raise(intent: Intent): Promise<IntentResolution> {
         if (hasTarget(intent)) {
             return this.raiseWithTarget(intent);
@@ -135,7 +140,7 @@ export class IntentHandler {
             const payload: ReceiveIntentPayload = {context: intent.context, intent: intent.type};
 
             const [result, returnData] = await collateClientCalls(listeningWindows.map((connection) => {
-                return this._apiHandler.dispatch(connection.identity, APIToClientTopic.RECEIVE_INTENT, payload);
+                return this._agent.sendIntentToClient(connection.identity, APIToClientTopic.RECEIVE_INTENT, payload);
             }));
             data = returnData;
 

@@ -36,9 +36,6 @@ export enum APIFromClientTopic {
     FIND_INTENT = 'FIND-INTENT',
     FIND_INTENTS_BY_CONTEXT = 'FIND-INTENTS-BY-CONTEXT',
     BROADCAST = 'BROADCAST',
-    RAISE_INTENT = 'RAISE-INTENT',
-    ADD_INTENT_LISTENER = 'ADD-INTENT-LISTENER',
-    REMOVE_INTENT_LISTENER = 'REMOVE-INTENT-LISTENER',
     ADD_CONTEXT_LISTENER = 'ADD-CONTEXT-LISTENER',
     REMOVE_CONTEXT_LISTENER = 'REMOVE-CONTEXT-LISTENER',
     GET_SYSTEM_CHANNELS = 'GET-SYSTEM-CHANNELS',
@@ -69,9 +66,6 @@ export interface APIFromClient {
     [APIFromClientTopic.FIND_INTENT]: [FindIntentPayload, AppIntent];
     [APIFromClientTopic.FIND_INTENTS_BY_CONTEXT]: [FindIntentsByContextPayload, AppIntent[]];
     [APIFromClientTopic.BROADCAST]: [BroadcastPayload, void];
-    [APIFromClientTopic.RAISE_INTENT]: [RaiseIntentPayload, IntentResolution];
-    [APIFromClientTopic.ADD_INTENT_LISTENER]: [AddIntentListenerPayload, void];
-    [APIFromClientTopic.REMOVE_INTENT_LISTENER]: [RemoveIntentListenerPayload, void];
     [APIFromClientTopic.ADD_CONTEXT_LISTENER]: [AddContextListenerPayload, void];
     [APIFromClientTopic.REMOVE_CONTEXT_LISTENER]: [AddContextListenerPayload, void];
     [APIFromClientTopic.GET_SYSTEM_CHANNELS]: [GetSystemChannelsPayload, SystemChannelTransport[]];

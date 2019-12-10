@@ -23,6 +23,7 @@ import {ConfigStoreBinding} from './model/ConfigStore';
 import {ContextChannel} from './model/ContextChannel';
 import {Environment} from './model/Environment';
 import {collateClientCalls, ClientCallsResult} from './utils/helpers';
+import { fdc3 } from '../client/p2p';
 
 @injectable()
 export class Main {
@@ -74,16 +75,16 @@ export class Main {
 
         // Wait for creation of any injected components that require async initialization
         await Injector.init();
-
+        const agent = await fdc3.Agent.create('fdc3-p2p-service');
+        agent.onIntentListenerAdded((intent, identity) => this.addIntentListener.bind(this)({intent}, identity));
+        agent.registerIntentResolver((intent, context, target, identity) => this.raiseIntent.bind(this)({intent, target, context}));
+        agent.onIntentListenerRemoved((intent, identity) => this.removeIntentListener.bind(this)({ intent }, identity));
         // Current API
         this._apiHandler.registerListeners<APIFromClient>({
             [APIFromClientTopic.OPEN]: this.open.bind(this),
             [APIFromClientTopic.FIND_INTENT]: this.findIntent.bind(this),
             [APIFromClientTopic.FIND_INTENTS_BY_CONTEXT]: this.findIntentsByContext.bind(this),
             [APIFromClientTopic.BROADCAST]: this.broadcast.bind(this),
-            [APIFromClientTopic.RAISE_INTENT]: this.raiseIntent.bind(this),
-            [APIFromClientTopic.ADD_INTENT_LISTENER]: this.addIntentListener.bind(this),
-            [APIFromClientTopic.REMOVE_INTENT_LISTENER]: this.removeIntentListener.bind(this),
             [APIFromClientTopic.ADD_CONTEXT_LISTENER]: this.addContextListener.bind(this),
             [APIFromClientTopic.REMOVE_CONTEXT_LISTENER]: this.removeContextListener.bind(this),
             [APIFromClientTopic.GET_SYSTEM_CHANNELS]: this.getSystemChannels.bind(this),

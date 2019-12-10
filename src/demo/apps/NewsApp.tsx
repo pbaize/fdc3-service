@@ -44,7 +44,7 @@ export function NewsApp(): React.ReactElement {
         });
 
         return function cleanUp() {
-            intentListener.unsubscribe();
+            intentListener.then(({unsubscribe}) => unsubscribe());
             contextListener.unsubscribe();
         };
     }, []);

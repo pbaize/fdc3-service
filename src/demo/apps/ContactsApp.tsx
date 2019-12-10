@@ -83,7 +83,7 @@ export function ContactsApp(): React.ReactElement {
         });
         // Cleanup
         return () => {
-            intentListener.unsubscribe();
+            intentListener.then(({unsubscribe}) => unsubscribe());
         };
     }, []);
 

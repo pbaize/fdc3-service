@@ -12,6 +12,7 @@ import {APIFromClientTopic, APIToClientTopic, RaiseIntentPayload, ReceiveContext
 import {ChannelChangedEvent, getChannelObject, ChannelContextListener} from './contextChannels';
 import {parseContext, validateEnvironment} from './validation';
 import {Transport, Targeted} from './EventRouter';
+import {fdc3} from './p2p';
 
 /**
  * This file was copied from the FDC3 v1 specification.
@@ -127,7 +128,7 @@ export interface IntentListener {
      * Calling this method has no effect if the listener has already been unsubscribed. To re-subscribe, call
      * [[addIntentListener]] again to create a new listener object.
      */
-    unsubscribe: () => void;
+    unsubscribe: () => Promise<void>;
 }
 
 const intentListeners: IntentListener[] = [];
@@ -295,9 +296,9 @@ export async function broadcast(context: Context): Promise<void> {
  * @throws [[FDC3Error]] with a [[SendContextError]] code.
  * @throws `TypeError` if `context` is not a valid [[Context]].
  **/
-export async function raiseIntent(intent: string, context: Context, target?: AppName): Promise<IntentResolution> {
-    return tryServiceDispatch(APIFromClientTopic.RAISE_INTENT, {intent, context: parseContext(context), target});
-}
+export const raiseIntent = fdc3.raiseIntent;
+
+export const Agent = fdc3.Agent;
 
 /**
  * Adds a listener for incoming intents from the Agent.
@@ -306,35 +307,7 @@ export async function raiseIntent(intent: string, context: Context, target?: App
  * @param intent The name of the intent to listen for.
  * @param handler The handler to call when we get sent an intent.
  */
-export function addIntentListener(intent: string, handler: (context: Context) => any | Promise<any>): IntentListener {
-    validateEnvironment();
-
-    const listener: IntentListener = {
-        intent,
-        handler,
-        unsubscribe: () => {
-            const index: number = intentListeners.indexOf(listener);
-
-            if (index >= 0) {
-                intentListeners.splice(index, 1);
-
-                if (!hasIntentListener(intent)) {
-                    tryServiceDispatch(APIFromClientTopic.REMOVE_INTENT_LISTENER, {intent});
-                }
-            }
-
-            return index >= 0;
-        }
-    };
-
-    const hasIntentListenerBefore = hasIntentListener(intent);
-    intentListeners.push(listener);
-
-    if (!hasIntentListenerBefore) {
-        tryServiceDispatch(APIFromClientTopic.ADD_INTENT_LISTENER, {intent});
-    }
-    return listener;
-}
+export const addIntentListener = fdc3.addIntentListener;
 
 /**
  * Adds a listener for incoming context broadcasts from the desktop agent.
